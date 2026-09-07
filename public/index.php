@@ -4,8 +4,6 @@ declare(strict_types=1);
 use MatrizConif\Import\SpreadsheetImportService;
 use MatrizConif\Security\Auth;
 use MatrizConif\Security\Csrf;
-use PDO;
-use Throwable;
 
 $database = require dirname(__DIR__) . '/config/bootstrap.php';
 $auth = new Auth($database);
@@ -27,11 +25,11 @@ $render = static function (string $template, array $data = []): never {
     exit;
 };
 
-$fetchPeriods = static function (PDO $database): array {
+$fetchPeriods = static function (\PDO $database): array {
     return $database->query('SELECT id, base_year, budget_year, title, status, notes, created_at FROM base_periods ORDER BY budget_year DESC, base_year DESC')->fetchAll();
 };
 
-$fetchImports = static function (PDO $database): array {
+$fetchImports = static function (\PDO $database): array {
     return $database->query(
         "SELECT ib.id, ib.import_type, ib.original_filename, ib.source_name, ib.row_count, ib.status, ib.uploaded_at,
                 bp.base_year, bp.budget_year, u.name AS uploaded_by_name
@@ -43,7 +41,7 @@ $fetchImports = static function (PDO $database): array {
     )->fetchAll();
 };
 
-$registerImport = static function (PDO $database, array $user, array $input, array $import): int {
+$registerImport = static function (\PDO $database, array $user, array $input, array $import): int {
     $database->beginTransaction();
     try {
         $summary = $import['summary'];
@@ -98,7 +96,7 @@ $registerImport = static function (PDO $database, array $user, array $input, arr
 
         $database->commit();
         return $batchId;
-    } catch (Throwable $exception) {
+    } catch (\Throwable $exception) {
         $database->rollBack();
         throw $exception;
     }
@@ -182,7 +180,7 @@ if ($path === '/admin/periods') {
                         ':created_by' => (int) $user['id'],
                     ]);
                     $redirect('/admin/periods?created=1');
-                } catch (Throwable $exception) {
+                } catch (\Throwable $exception) {
                     $errors[] = str_contains($exception->getMessage(), 'Duplicate')
                         ? 'Este periodo ja esta cadastrado.'
                         : $exception->getMessage();
@@ -239,7 +237,7 @@ if ($path === '/admin/imports') {
                         'original_filename' => $import['original_filename'],
                         'import_type' => $input['import_type'],
                     ];
-                } catch (Throwable $exception) {
+                } catch (\Throwable $exception) {
                     $errors[] = $exception->getMessage();
                 }
             }
