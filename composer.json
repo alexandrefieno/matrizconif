@@ -1,0 +1,21 @@
+{
+  "name": "alexandrefieno/matrizconif",
+  "description": "Simulador auditável da Matriz CONIF",
+  "type": "project",
+  "require": {
+    "php": "^8.2",
+    "ext-pdo": "*",
+    "ext-pdo_mysql": "*",
+    "ext-json": "*",
+    "phpoffice/phpspreadsheet": "^2.1",
+    "vlucas/phpdotenv": "^5.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "MatrizConif\\": "backend/"
+    }
+  },
+  "config": {
+    "sort-packages": true
+  }
+}
