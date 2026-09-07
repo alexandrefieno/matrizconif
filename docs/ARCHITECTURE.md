@@ -8,6 +8,16 @@ Aplicação PHP/MySQL institucional no cálculo e focada no **Campus Pouso Alegr
 2. **Administração**: importa bases de todas as unidades, valida campos, configura parâmetros, calcula cenários e publica a visão do campus.
 3. **Memória institucional**: mantém os demais campi como denominador, comparação e trilha de auditoria.
 
+## Ambiente de referência
+
+- XAMPP no Windows;
+- Apache 2.4.58;
+- PHP 8.2.12;
+- MariaDB 10.4.32;
+- phpMyAdmin 5.2.1;
+- Composer;
+- `public/` configurado como raiz do site.
+
 ## Organização
 
 - `backend/`: regras de negócio, cálculo, autenticação, importação e persistência.
@@ -22,14 +32,15 @@ Aplicação PHP/MySQL institucional no cálculo e focada no **Campus Pouso Alegr
 ## Fluxo dos dados
 
 1. O administrador cria um período com `ano_base` e `ano_orcamento`.
-2. A planilha é armazenada fora da área pública e recebe SHA-256.
+2. Uma única planilha é recebida por operação, armazenada fora da área pública e identificada por SHA-256.
 3. As linhas entram em área temporária.
-4. Validações de estrutura, domínio, totais e duplicidade são executadas.
-5. Somente um lote validado pode alimentar a base oficial do período.
-6. O motor calcula todas as unidades para formar o denominador institucional.
-7. A simulação registra parâmetros e versão do motor.
-8. Apenas cenário validado pode ser publicado.
-9. A página pública prioriza Pouso Alegre e mantém as demais unidades na memória de cálculo.
+4. O sistema mostra resumo de abas, colunas, linhas, unidades, registros de Pouso Alegre, erros e alertas.
+5. O administrador confere o resumo e decide rejeitar ou confirmar o arquivo.
+6. Somente um lote conferido e confirmado pode alimentar a base oficial do período.
+7. O motor calcula todas as unidades para formar o denominador institucional.
+8. A simulação registra parâmetros e versão do motor.
+9. Apenas cenário validado pode ser publicado.
+10. A página pública prioriza Pouso Alegre e mantém as demais unidades na memória de cálculo.
 
 ## Segurança
 
@@ -38,7 +49,8 @@ Aplicação PHP/MySQL institucional no cálculo e focada no **Campus Pouso Alegr
 - Senhas com `password_hash`.
 - Sessões seguras, CSRF e controle por função.
 - Credenciais somente em `.env`, nunca no GitHub.
-- Upload com limite, extensão, MIME, hash e armazenamento fora de `public/`.
+- Upload unitário, extensão, MIME, hash e armazenamento fora de `public/`.
+- Sem teto adicional definido pela aplicação; os limites técnicos do PHP são exibidos ao administrador.
 
 ## Fonte metodológica
 

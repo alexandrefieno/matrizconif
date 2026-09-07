@@ -1,9 +1,14 @@
 <?php
 declare(strict_types=1);
 
+use Dotenv\Dotenv;
 use MatrizConif\Infrastructure\Database;
 
-require dirname(__DIR__) . '/vendor/autoload.php';
+$root = dirname(__DIR__);
+
+require $root . '/vendor/autoload.php';
+
+Dotenv::createImmutable($root)->safeLoad();
 
 date_default_timezone_set($_ENV['APP_TIMEZONE'] ?? 'America/Sao_Paulo');
 

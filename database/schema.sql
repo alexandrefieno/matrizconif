@@ -1,4 +1,4 @@
--- MySQL 8.0 / MariaDB 10.6+
+-- Compatível com MySQL 8.0+ e MariaDB 10.4+ (ambiente de referência: MariaDB 10.4.32)
 CREATE DATABASE IF NOT EXISTS matrizconif
   CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE matrizconif;
