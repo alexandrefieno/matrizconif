@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 use MatrizConif\Import\SpreadsheetImportService;
+use MatrizConif\Import\ImportBatchService;
 use MatrizConif\Security\Auth;
 use MatrizConif\Security\Csrf;
 
@@ -49,7 +50,7 @@ $registerImport = static function (\PDO $database, array $user, array $input, ar
             "INSERT INTO import_batches
                 (base_period_id, import_type, original_filename, stored_filename, sha256, source_name, source_url, reference_date, row_count, status, validation_report, uploaded_by)
              VALUES
-                (:base_period_id, :import_type, :original_filename, :stored_filename, :sha256, :source_name, :source_url, :reference_date, :row_count, 'validated', :validation_report, :uploaded_by)"
+                (:base_period_id, :import_type, :original_filename, :stored_filename, :sha256, :source_name, :source_url, :reference_date, :row_count, 'uploaded', :validation_report, :uploaded_by)"
         );
         $stmt->execute([
             ':base_period_id' => (int) $input['base_period_id'],
@@ -68,7 +69,7 @@ $registerImport = static function (\PDO $database, array $user, array $input, ar
 
         $rowStmt = $database->prepare(
             "INSERT INTO import_rows (import_batch_id, source_row, payload, validation_status)
-             VALUES (:import_batch_id, :source_row, :payload, 'valid')"
+             VALUES (:import_batch_id, :source_row, :payload, 'pending')"
         );
         foreach ($import['rows'] as $sourceRow => $payload) {
             $rowStmt->execute([
@@ -251,6 +252,69 @@ if ($path === '/admin/imports') {
         'imports' => $fetchImports($database),
         'errors' => $errors,
         'lastImport' => $lastImport,
+    ]);
+}
+
+if (preg_match('#^/admin/imports/(\d+)$#', $path, $matches)) {
+    $batchId = (int) $matches[1];
+    $service = new ImportBatchService($database);
+    $batch = $service->batch($batchId);
+    if (!$batch) {
+        http_response_code(404);
+        $render('errors/404');
+    }
+
+    $errors = [];
+    if ($method === 'POST') {
+        if (!Csrf::validate($_POST['_token'] ?? null)) {
+            http_response_code(419);
+            $errors[] = 'A sessao do formulario expirou. Tente novamente.';
+        } else {
+            try {
+                $action = (string) ($_POST['action'] ?? '');
+                if ($action === 'validate') {
+                    $mapping = array_map('trim', (array) ($_POST['mapping'] ?? []));
+                    $report = $service->validate($batchId, $mapping, (int) $user['id']);
+                    $redirect('/admin/imports/' . $batchId . '?validated=1&result=' . urlencode((string) $report['status']));
+                }
+                if ($action === 'reject') {
+                    $service->reject($batchId, (string) ($_POST['rejection_reason'] ?? ''), (int) $user['id']);
+                    $redirect('/admin/imports/' . $batchId . '?rejected=1');
+                }
+                if ($action === 'promote') {
+                    $inserted = $service->promote($batchId, (int) $user['id']);
+                    $redirect('/admin/imports/' . $batchId . '?promoted=' . $inserted);
+                }
+                $errors[] = 'Acao administrativa desconhecida.';
+            } catch (\Throwable $exception) {
+                $errors[] = $exception->getMessage();
+            }
+        }
+        $batch = $service->batch($batchId);
+    }
+
+    $summary = json_decode((string) $batch['validation_report'], true) ?: [];
+    $headers = array_map('strval', $summary['headers'] ?? []);
+    $savedMapping = json_decode((string) ($batch['mapping'] ?? ''), true) ?: [];
+    $mapping = $savedMapping ?: $service->suggestMapping((string) $batch['import_type'], $headers);
+    $page = max(1, (int) ($_GET['page'] ?? 1));
+    $perPage = 25;
+    $render('admin/import-detail', [
+        'user' => $user,
+        'csrfToken' => Csrf::token(),
+        'batch' => $batch,
+        'summary' => $summary,
+        'headers' => $headers,
+        'fields' => $service->fieldsFor((string) $batch['import_type']),
+        'mapping' => $mapping,
+        'rows' => $service->rows($batchId, $page, $perPage),
+        'page' => $page,
+        'pageCount' => max(1, (int) ceil(((int) $batch['row_count']) / $perPage)),
+        'errors' => $errors,
+        'validated' => isset($_GET['validated']),
+        'validationResult' => (string) ($_GET['result'] ?? ''),
+        'rejected' => isset($_GET['rejected']),
+        'promoted' => isset($_GET['promoted']) ? (int) $_GET['promoted'] : null,
     ]);
 }
 

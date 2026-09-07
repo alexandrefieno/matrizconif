@@ -76,11 +76,11 @@
           <article class="metric-card"><span>Aba lida</span><strong><?= htmlspecialchars($lastImport['selected_sheet']) ?></strong><small><?= count($lastImport['sheet_names']) ?> aba(s) no arquivo</small></article>
           <article class="metric-card"><span>Linhas</span><strong><?= number_format((int) $lastImport['row_count'], 0, ',', '.') ?></strong><small><?= (int) $lastImport['column_count'] ?> coluna(s)</small></article>
         </div>
-        <?php if ($lastImport['truncated']): ?><div class="alert alert-warning">A leitura foi limitada a <?= number_format((int) $lastImport['stored_row_limit'], 0, ',', '.') ?> linhas nesta versao inicial.</div><?php endif; ?>
         <h3>Cabecalhos identificados</h3>
         <div class="field-grid"><?php foreach ($lastImport['headers'] as $header): ?><span><?= htmlspecialchars((string) $header) ?></span><?php endforeach; ?></div>
         <h3>Amostra das primeiras linhas</h3>
         <div class="table-scroll"><table><thead><tr><?php foreach ($lastImport['headers'] as $header): ?><th><?= htmlspecialchars((string) $header) ?></th><?php endforeach; ?></tr></thead><tbody><?php foreach ($lastImport['preview_rows'] as $row): ?><tr><?php foreach ($lastImport['headers'] as $header): ?><td><?= htmlspecialchars((string) ($row[$header] ?? '')) ?></td><?php endforeach; ?></tr><?php endforeach; ?></tbody></table></div>
+        <p class="result-action"><a class="button-link" href="/admin/imports/<?= (int) $lastImport['batch_id'] ?>">Mapear e conferir este lote</a></p>
       </section>
     <?php endif; ?>
 
@@ -89,7 +89,7 @@
       <?php if (!$imports): ?>
         <p class="muted">Nenhum lote importado ainda.</p>
       <?php else: ?>
-        <div class="table-scroll"><table><thead><tr><th>Lote</th><th>Periodo</th><th>Tipo</th><th>Arquivo</th><th>Linhas</th><th>Status</th><th>Fonte</th><th>Data</th></tr></thead><tbody><?php foreach ($imports as $import): ?><tr><td>#<?= (int) $import['id'] ?></td><td><?= (int) $import['base_year'] ?> -> <?= (int) $import['budget_year'] ?></td><td><?= htmlspecialchars($import['import_type']) ?></td><td><?= htmlspecialchars($import['original_filename']) ?></td><td><?= number_format((int) $import['row_count'], 0, ',', '.') ?></td><td><?= htmlspecialchars($import['status']) ?></td><td><?= htmlspecialchars($import['source_name']) ?></td><td><?= htmlspecialchars(date('d/m/Y H:i', strtotime((string) $import['uploaded_at']))) ?></td></tr><?php endforeach; ?></tbody></table></div>
+        <div class="table-scroll"><table><thead><tr><th>Lote</th><th>Periodo</th><th>Tipo</th><th>Arquivo</th><th>Linhas</th><th>Status</th><th>Fonte</th><th>Data</th><th></th></tr></thead><tbody><?php foreach ($imports as $import): ?><tr><td>#<?= (int) $import['id'] ?></td><td><?= (int) $import['base_year'] ?> -> <?= (int) $import['budget_year'] ?></td><td><?= htmlspecialchars($import['import_type']) ?></td><td><?= htmlspecialchars($import['original_filename']) ?></td><td><?= number_format((int) $import['row_count'], 0, ',', '.') ?></td><td><span class="status status-<?= htmlspecialchars($import['status']) ?>"><?= htmlspecialchars($import['status']) ?></span></td><td><?= htmlspecialchars($import['source_name']) ?></td><td><?= htmlspecialchars(date('d/m/Y H:i', strtotime((string) $import['uploaded_at']))) ?></td><td><a class="text-link" href="/admin/imports/<?= (int) $import['id'] ?>">Conferir lote</a></td></tr><?php endforeach; ?></tbody></table></div>
       <?php endif; ?>
     </section>
   </main>

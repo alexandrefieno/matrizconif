@@ -143,3 +143,13 @@ O comando cria, somente se ainda não existir administrador:
 A senha é transformada em hash pelo PHP antes de ser gravada. O painel exibirá um alerta de credenciais provisórias e oferecerá **Minha conta** para alterar o usuário e definir uma senha com pelo menos 12 caracteres.
 
 Se o banco tiver sido criado com uma versão anterior do `schema.sql`, execute uma única vez `database/migrations/001_add_admin_credentials.sql` no phpMyAdmin antes do comando. As credenciais `admin/admin` são exclusivas do teste local e não podem ser mantidas na publicação.
+
+## 8. Atualizar para a Etapa Administrativa 3
+
+Se a instalação local já estava funcionando antes da Etapa 3, não importe novamente o `schema.sql`. No phpMyAdmin, selecione o banco `matrizconif`, abra **Importar** e execute uma única vez:
+
+```text
+database/migrations/002_stage3_import_validation.sql
+```
+
+Depois, acesse **Administração > Importações > Conferir lote**. Lotes importados anteriormente retornarão ao estado `uploaded`, pois ainda não passaram pelo novo mapeamento e pela validação linha a linha.

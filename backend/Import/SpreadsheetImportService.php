@@ -4,13 +4,11 @@ declare(strict_types=1);
 namespace MatrizConif\Import;
 
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Reader\IReadFilter;
 use RuntimeException;
 
 final class SpreadsheetImportService
 {
     private const MAX_PREVIEW_ROWS = 10;
-    private const MAX_STORED_ROWS = 5000;
 
     public function __construct(private readonly string $storagePath)
     {
@@ -67,14 +65,11 @@ final class SpreadsheetImportService
     {
         $reader = IOFactory::createReaderForFile($path);
         $reader->setReadDataOnly(true);
-        if (method_exists($reader, 'setReadFilter')) {
-            $reader->setReadFilter(new PreviewReadFilter(self::MAX_STORED_ROWS + 1));
-        }
 
         $spreadsheet = $reader->load($path);
         $sheetNames = $spreadsheet->getSheetNames();
         $sheet = $spreadsheet->getSheet(0);
-        $highestRow = min($sheet->getHighestDataRow(), self::MAX_STORED_ROWS + 1);
+        $highestRow = $sheet->getHighestDataRow();
         $highestColumn = $sheet->getHighestDataColumn();
         $rawRows = $sheet->rangeToArray('A1:' . $highestColumn . $highestRow, null, true, true, true);
 
@@ -109,8 +104,7 @@ final class SpreadsheetImportService
             'column_count' => count($headers),
             'row_count' => count($rows),
             'preview_rows' => $preview,
-            'stored_row_limit' => self::MAX_STORED_ROWS,
-            'truncated' => $sheet->getHighestDataRow() > self::MAX_STORED_ROWS + 1,
+            'truncated' => false,
         ];
 
         $spreadsheet->disconnectWorksheets();
@@ -168,17 +162,5 @@ final class SpreadsheetImportService
     private function isBlankPayload(array $payload): bool
     {
         return array_filter($payload, static fn ($value): bool => trim((string) $value) !== '') === [];
-    }
-}
-
-final class PreviewReadFilter implements IReadFilter
-{
-    public function __construct(private readonly int $maxRow)
-    {
-    }
-
-    public function readCell(string $columnAddress, int $row, string $worksheetName = ''): bool
-    {
-        return $row <= $this->maxRow;
     }
 }

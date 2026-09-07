@@ -29,12 +29,12 @@
     <section class="summary-grid" aria-label="Resumo da administracao">
       <article class="metric-card"><span>Escopo principal</span><strong>Pouso Alegre</strong><small>Simulacao centrada no campus.</small></article>
       <article class="metric-card"><span>Base institucional</span><strong>IFSULDEMINAS</strong><small>Dados das demais unidades entram para participacao relativa.</small></article>
-      <article class="metric-card"><span>Status do modulo</span><strong>Em construcao</strong><small>Validacao local pelo XAMPP.</small></article>
+      <article class="metric-card"><span>Status do modulo</span><strong>Etapa 3</strong><small>Importacao e conferencia ativas.</small></article>
     </section>
 
     <section class="admin-grid" aria-label="Etapas administrativas">
       <a class="admin-card" href="/admin/periods"><span>01</span><strong>Anos-base</strong><small>Cadastrar ano-base, ano orcamentario, status e observacoes.</small><em>Acessar Anos-base</em></a>
-      <a class="admin-card" href="/admin/imports"><span>02</span><strong>Importacoes</strong><small>Receber uma planilha por vez, resumir conteudo e registrar fonte.</small><em>Acessar Importacoes</em></a>
+      <a class="admin-card" href="/admin/imports"><span>02</span><strong>Importacoes</strong><small>Receber, mapear, validar e incorporar uma planilha por vez.</small><em>Acessar Importacoes</em></a>
       <a class="admin-card" href="/admin/parameters"><span>03</span><strong>Parametros</strong><small>Definir valores normativos, hipoteses e parametros administrativos.</small><em>Acessar Parametros</em></a>
       <a class="admin-card" href="/admin/simulations"><span>04</span><strong>Simulacoes</strong><small>Executar cenarios para o campus Pouso Alegre e comparar resultados.</small><em>Acessar Simulacoes</em></a>
       <a class="admin-card" href="/admin/publishing"><span>05</span><strong>Publicacao</strong><small>Liberar para o portal publico apenas simulacoes conferidas.</small><em>Acessar Publicacao</em></a>

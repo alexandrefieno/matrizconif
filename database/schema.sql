@@ -41,6 +41,17 @@ CREATE TABLE units (
   active BOOLEAN NOT NULL DEFAULT TRUE
 ) ENGINE=InnoDB;
 
+INSERT INTO units (code, name, unit_type) VALUES
+  ('REITORIA', 'REITORIA', 'rectory'),
+  ('CARMO_DE_MINAS', 'CARMO DE MINAS', 'campus'),
+  ('INCONFIDENTES', 'INCONFIDENTES', 'campus'),
+  ('MACHADO', 'MACHADO', 'campus'),
+  ('MUZAMBINHO', 'MUZAMBINHO', 'campus'),
+  ('PASSOS', 'PASSOS', 'campus'),
+  ('POUSO_ALEGRE', 'POUSO ALEGRE', 'campus'),
+  ('POCOS_DE_CALDAS', 'POCOS DE CALDAS', 'campus'),
+  ('TRES_CORACOES', 'TRES CORACOES', 'campus');
+
 CREATE TABLE import_batches (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   base_period_id BIGINT UNSIGNED NOT NULL,
@@ -53,12 +64,20 @@ CREATE TABLE import_batches (
   reference_date DATE NULL,
   row_count INT UNSIGNED NOT NULL DEFAULT 0,
   status ENUM('uploaded','checking','rejected','validated','promoted') NOT NULL DEFAULT 'uploaded',
+  mapping JSON NULL,
   validation_report JSON NULL,
+  rejection_reason TEXT NULL,
   uploaded_by BIGINT UNSIGNED NOT NULL,
+  validated_by BIGINT UNSIGNED NULL,
+  promoted_by BIGINT UNSIGNED NULL,
+  validated_at DATETIME NULL,
+  promoted_at DATETIME NULL,
   uploaded_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY uq_import_hash (base_period_id,import_type,sha256),
   CONSTRAINT fk_import_period FOREIGN KEY (base_period_id) REFERENCES base_periods(id),
-  CONSTRAINT fk_import_user FOREIGN KEY (uploaded_by) REFERENCES users(id)
+  CONSTRAINT fk_import_user FOREIGN KEY (uploaded_by) REFERENCES users(id),
+  CONSTRAINT fk_import_validator FOREIGN KEY (validated_by) REFERENCES users(id),
+  CONSTRAINT fk_import_promoter FOREIGN KEY (promoted_by) REFERENCES users(id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE import_rows (
@@ -104,10 +123,56 @@ CREATE TABLE pnp_income_bands (
   unit_id BIGINT UNSIGNED NOT NULL,
   band_code VARCHAR(40) NOT NULL,
   student_count DECIMAL(16,4) NOT NULL,
+  source_row INT UNSIGNED NULL,
   UNIQUE KEY uq_income_band (base_period_id,unit_id,band_code),
   CONSTRAINT fk_income_period FOREIGN KEY (base_period_id) REFERENCES base_periods(id),
   CONSTRAINT fk_income_import FOREIGN KEY (import_batch_id) REFERENCES import_batches(id),
   CONSTRAINT fk_income_unit FOREIGN KEY (unit_id) REFERENCES units(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE institution_indicators (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  base_period_id BIGINT UNSIGNED NOT NULL,
+  import_batch_id BIGINT UNSIGNED NOT NULL,
+  unit_id BIGINT UNSIGNED NOT NULL,
+  indicator_key VARCHAR(160) NOT NULL,
+  numeric_value DECIMAL(24,10) NULL,
+  text_value TEXT NULL,
+  source_row INT UNSIGNED NULL,
+  UNIQUE KEY uq_institution_indicator (base_period_id,unit_id,indicator_key),
+  CONSTRAINT fk_indicator_period FOREIGN KEY (base_period_id) REFERENCES base_periods(id),
+  CONSTRAINT fk_indicator_import FOREIGN KEY (import_batch_id) REFERENCES import_batches(id),
+  CONSTRAINT fk_indicator_unit FOREIGN KEY (unit_id) REFERENCES units(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE campus_parameter_values (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  base_period_id BIGINT UNSIGNED NOT NULL,
+  import_batch_id BIGINT UNSIGNED NOT NULL,
+  unit_id BIGINT UNSIGNED NOT NULL,
+  parameter_key VARCHAR(160) NOT NULL,
+  numeric_value DECIMAL(24,10) NULL,
+  text_value TEXT NULL,
+  source_row INT UNSIGNED NULL,
+  UNIQUE KEY uq_campus_parameter (base_period_id,unit_id,parameter_key),
+  CONSTRAINT fk_campus_parameter_period FOREIGN KEY (base_period_id) REFERENCES base_periods(id),
+  CONSTRAINT fk_campus_parameter_import FOREIGN KEY (import_batch_id) REFERENCES import_batches(id),
+  CONSTRAINT fk_campus_parameter_unit FOREIGN KEY (unit_id) REFERENCES units(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE budget_envelopes (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  base_period_id BIGINT UNSIGNED NOT NULL,
+  import_batch_id BIGINT UNSIGNED NOT NULL,
+  unit_id BIGINT UNSIGNED NOT NULL,
+  component VARCHAR(160) NOT NULL,
+  action_code VARCHAR(40) NULL,
+  amount DECIMAL(18,2) NOT NULL,
+  source_row INT UNSIGNED NULL,
+  UNIQUE KEY uq_budget_envelope (base_period_id,unit_id,component,action_code),
+  CONSTRAINT fk_envelope_period FOREIGN KEY (base_period_id) REFERENCES base_periods(id),
+  CONSTRAINT fk_envelope_import FOREIGN KEY (import_batch_id) REFERENCES import_batches(id),
+  CONSTRAINT fk_envelope_unit FOREIGN KEY (unit_id) REFERENCES units(id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE matrix_parameters (
