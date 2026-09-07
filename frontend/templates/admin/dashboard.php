@@ -10,6 +10,8 @@
   <header class="topbar">
     <div><strong>Matriz CONIF</strong><span>Administracao</span></div>
     <nav>
+      <a href="/admin/periods">Anos-base</a>
+      <a href="/admin/imports">Importacoes</a>
       <a href="/">Portal publico</a>
       <a href="/admin/account">Minha conta</a>
       <form method="post" action="/admin/logout" class="inline-form"><input type="hidden" name="_token" value="<?= htmlspecialchars($csrfToken) ?>"><button class="link-button">Sair</button></form>
@@ -31,12 +33,12 @@
     </section>
 
     <section class="admin-grid" aria-label="Etapas administrativas">
-      <a class="admin-card" href="/admin/periods"><span>01</span><strong>Anos-base</strong><small>Cadastrar ano-base, ano orcamentario, status e observacoes.</small></a>
-      <a class="admin-card" href="/admin/imports"><span>02</span><strong>Importacoes</strong><small>Receber uma planilha por vez, resumir conteudo e registrar fonte.</small></a>
-      <a class="admin-card" href="/admin/parameters"><span>03</span><strong>Parametros</strong><small>Definir valores normativos, hipoteses e parametros administrativos.</small></a>
-      <a class="admin-card" href="/admin/simulations"><span>04</span><strong>Simulacoes</strong><small>Executar cenarios para o campus Pouso Alegre e comparar resultados.</small></a>
-      <a class="admin-card" href="/admin/publishing"><span>05</span><strong>Publicacao</strong><small>Liberar para o portal publico apenas simulacoes conferidas.</small></a>
-      <a class="admin-card" href="/admin/audit"><span>06</span><strong>Auditoria</strong><small>Consultar historico de uploads, parametros e mudancas relevantes.</small></a>
+      <a class="admin-card" href="/admin/periods"><span>01</span><strong>Anos-base</strong><small>Cadastrar ano-base, ano orcamentario, status e observacoes.</small><em>Acessar Anos-base</em></a>
+      <a class="admin-card" href="/admin/imports"><span>02</span><strong>Importacoes</strong><small>Receber uma planilha por vez, resumir conteudo e registrar fonte.</small><em>Acessar Importacoes</em></a>
+      <a class="admin-card" href="/admin/parameters"><span>03</span><strong>Parametros</strong><small>Definir valores normativos, hipoteses e parametros administrativos.</small><em>Acessar Parametros</em></a>
+      <a class="admin-card" href="/admin/simulations"><span>04</span><strong>Simulacoes</strong><small>Executar cenarios para o campus Pouso Alegre e comparar resultados.</small><em>Acessar Simulacoes</em></a>
+      <a class="admin-card" href="/admin/publishing"><span>05</span><strong>Publicacao</strong><small>Liberar para o portal publico apenas simulacoes conferidas.</small><em>Acessar Publicacao</em></a>
+      <a class="admin-card" href="/admin/audit"><span>06</span><strong>Auditoria</strong><small>Consultar historico de uploads, parametros e mudancas relevantes.</small><em>Acessar Auditoria</em></a>
     </section>
   </main>
 </body>
