@@ -99,10 +99,10 @@ final class Auth
             return ['Esse nome de usuário já está em uso.'];
         }
 
-        $sql = 'UPDATE users SET username = :username, must_change_password = 0';
+        $sql = 'UPDATE users SET username = :username';
         $parameters = ['username' => $username, 'id' => $userId];
         if ($newPassword !== null) {
-            $sql .= ', password_hash = :password_hash';
+            $sql .= ', password_hash = :password_hash, must_change_password = 0';
             $parameters['password_hash'] = password_hash($newPassword, PASSWORD_DEFAULT);
         }
         $sql .= ' WHERE id = :id';
