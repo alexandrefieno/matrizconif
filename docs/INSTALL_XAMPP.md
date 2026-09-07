@@ -126,3 +126,20 @@ A aplicação receberá uma planilha por operação. Não haverá teto adicional
 - `max_execution_time`.
 
 O painel administrativo exibirá esses limites. Cada arquivo passará por três etapas: recebimento, conferência com resumo e incorporação confirmada à base. Nenhum arquivo será incorporado automaticamente.
+
+## 7. Criar o administrador de teste
+
+Depois de importar o esquema e executar `composer install`, rode na raiz do projeto:
+
+```powershell
+php database/seeds/create_test_admin.php
+```
+
+O comando cria, somente se ainda não existir administrador:
+
+- usuário: `admin`;
+- senha: `admin`.
+
+A senha é transformada em hash pelo PHP antes de ser gravada. O painel exibirá um alerta de credenciais provisórias e oferecerá **Minha conta** para alterar o usuário e definir uma senha com pelo menos 12 caracteres.
+
+Se o banco tiver sido criado com uma versão anterior do `schema.sql`, execute uma única vez `database/migrations/001_add_admin_credentials.sql` no phpMyAdmin antes do comando. As credenciais `admin/admin` são exclusivas do teste local e não podem ser mantidas na publicação.
