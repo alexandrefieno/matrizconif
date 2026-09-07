@@ -3,6 +3,11 @@ declare(strict_types=1);
 
 $database = require dirname(__DIR__, 2) . '/config/bootstrap.php';
 
+if (($_ENV['APP_ENV'] ?? 'production') !== 'local') {
+    fwrite(STDERR, "Credenciais de teste só podem ser criadas com APP_ENV=local.\n");
+    exit(1);
+}
+
 $existing = $database->query("SELECT id FROM users WHERE role = 'admin' LIMIT 1")->fetch();
 if ($existing) {
     fwrite(STDOUT, "Já existe um administrador. Nenhuma credencial foi alterada.\n");
