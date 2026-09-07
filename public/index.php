@@ -28,7 +28,7 @@ $render = static function (string $template, array $data = []): never {
 };
 
 $fetchPeriods = static function (PDO $database): array {
-    return $database->query('SELECT id, base_year, budget_year, title, status FROM base_periods ORDER BY budget_year DESC, base_year DESC')->fetchAll();
+    return $database->query('SELECT id, base_year, budget_year, title, status, notes, created_at FROM base_periods ORDER BY budget_year DESC, base_year DESC')->fetchAll();
 };
 
 $fetchImports = static function (PDO $database): array {
@@ -145,6 +145,61 @@ if ($path === '/admin' && $method === 'GET') {
     $render('admin/dashboard', ['user' => $user, 'csrfToken' => Csrf::token()]);
 }
 
+if ($path === '/admin/periods') {
+    $errors = [];
+    if ($method === 'POST') {
+        if (!Csrf::validate($_POST['_token'] ?? null)) {
+            http_response_code(419);
+            $errors[] = 'A sessao do formulario expirou. Tente novamente.';
+        } else {
+            $baseYear = (int) ($_POST['base_year'] ?? 0);
+            $budgetYear = (int) ($_POST['budget_year'] ?? 0);
+            $title = trim((string) ($_POST['title'] ?? ''));
+            $notes = trim((string) ($_POST['notes'] ?? ''));
+            if ($baseYear < 2000 || $baseYear > 2100) {
+                $errors[] = 'Informe um ano-base valido.';
+            }
+            if ($budgetYear < 2000 || $budgetYear > 2100) {
+                $errors[] = 'Informe um ano orcamentario valido.';
+            }
+            if ($budgetYear <= $baseYear) {
+                $errors[] = 'O ano orcamentario deve ser posterior ao ano-base.';
+            }
+            if ($title === '') {
+                $title = 'Base ' . $baseYear . ' / Orcamento ' . $budgetYear;
+            }
+            if (!$errors) {
+                try {
+                    $stmt = $database->prepare(
+                        "INSERT INTO base_periods (base_year, budget_year, title, notes, created_by)
+                         VALUES (:base_year, :budget_year, :title, :notes, :created_by)"
+                    );
+                    $stmt->execute([
+                        ':base_year' => $baseYear,
+                        ':budget_year' => $budgetYear,
+                        ':title' => $title,
+                        ':notes' => $notes !== '' ? $notes : null,
+                        ':created_by' => (int) $user['id'],
+                    ]);
+                    $redirect('/admin/periods?created=1');
+                } catch (Throwable $exception) {
+                    $errors[] = str_contains($exception->getMessage(), 'Duplicate')
+                        ? 'Este periodo ja esta cadastrado.'
+                        : $exception->getMessage();
+                }
+            }
+        }
+    }
+
+    $render('admin/periods', [
+        'user' => $user,
+        'csrfToken' => Csrf::token(),
+        'periods' => $fetchPeriods($database),
+        'errors' => $errors,
+        'created' => isset($_GET['created']),
+    ]);
+}
+
 if ($path === '/admin/imports') {
     $errors = [];
     $lastImport = null;
@@ -202,14 +257,6 @@ if ($path === '/admin/imports') {
 }
 
 $adminSections = [
-    '/admin/periods' => [
-        'pageTitle' => 'Anos-base',
-        'heading' => 'Anos-base e periodos orcamentarios',
-        'description' => 'Cadastro do ano-base analisado e do ano orcamentario simulado. Exemplo: dados de 2025 para simular o orcamento de 2027.',
-        'statusText' => 'Pagina estrutural pronta para receber o formulario e a listagem de periodos.',
-        'actions' => ['Criar periodo', 'Informar ano-base e ano orcamentario', 'Definir status: rascunho, validado, publicado ou arquivado', 'Registrar observacoes metodologicas'],
-        'fields' => ['Ano-base', 'Ano orcamentario', 'Titulo do ciclo', 'Status', 'Observacoes', 'Responsavel pelo cadastro'],
-    ],
     '/admin/parameters' => [
         'pageTitle' => 'Parametros',
         'heading' => 'Parametros da Matriz CONIF',
